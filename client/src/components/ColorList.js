@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import {useParams} from 'react-router-dom'
+import React, { useState , useEffect} from "react";
+import {useParams, useHistory} from 'react-router-dom'
 import axios from "axios";
 
 import axiosWithAuth from '../utils/axiosWithAuth'
@@ -9,9 +9,8 @@ const initialColor = {
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors, props }) => {
+const ColorList = ({ colors, updateColors, props}) => {
   console.log(colors);
-  const params = useParams()
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
 
@@ -28,9 +27,12 @@ const ColorList = ({ colors, updateColors, props }) => {
     axiosWithAuth()
     .put(`http://localhost:5000/api/colors/${colorToEdit.id}`,colorToEdit )
     .then(res => {
-        const updated = colors.filter( update => update.id !== colors.id)
-        updateColors({...colorToEdit, updated})
-        props.history.push("/colors")
+        const updated = colors.filter( update => update.id !== colorToEdit.id)
+        console.log(updated)
+        console.log(colorToEdit)
+        updateColors([ ...updated,colorToEdit])
+        setEditing(false)
+       
     })
     .catch( err => console.log(err))
     // Make a put request to save your updated color
@@ -47,6 +49,8 @@ const ColorList = ({ colors, updateColors, props }) => {
      })
      .catch( err => console.log(err))
   };
+
+       
 
   return (
     <div className="colors-wrap">
