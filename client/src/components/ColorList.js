@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
+import {useParams, useHistory} from 'react-router-dom'
 import axios from "axios";
+
+import axiosWithAuth from '../utils/axiosWithAuth'
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
+const ColorList = ({ colors, updateColors, props}) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
@@ -14,18 +17,40 @@ const ColorList = ({ colors, updateColors }) => {
   const editColor = color => {
     setEditing(true);
     setColorToEdit(color);
+    
   };
+
+  console.log(colorToEdit.id)
 
   const saveEdit = e => {
     e.preventDefault();
+    axiosWithAuth()
+    .put(`http://localhost:5000/api/colors/${colorToEdit.id}`,colorToEdit )
+    .then(res => {
+        const updated = colors.filter( update => update.id !== colorToEdit.id)
+        console.log(updated)
+        console.log(colorToEdit)
+        updateColors([ ...updated,colorToEdit])
+        setEditing(false)
+       
+    })
+    .catch( err => console.log(err))
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
   };
 
   const deleteColor = color => {
-    // make a delete request to delete this color
+     axiosWithAuth()
+     .delete(`http://localhost:5000/api/colors/${color.id}`)
+     .then( res => {
+       const newColors = colors.filter( old => old.id !== color.id)
+       updateColors(newColors)
+     })
+     .catch( err => console.log(err))
   };
+
+       
 
   return (
     <div className="colors-wrap">
